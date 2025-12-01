@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 import uvicorn
 import string
 from secrets import choice
+from database.redis_cli import write_data,get_url_by_slug
 
 def random_slug() -> str:
     ALP = string.ascii_letters + string.digits
@@ -24,9 +25,20 @@ async def main():
 @app.get("/write/{url}")
 async def genrate_slug_write(url:str):
     try:
-        pass
+        slug:str = random_slug()
+        write_data(url,slug)
+        return slug
     except Exception as e:
         raise HTTPException(status_code = 400,detail = f"Error : {e}")
+
+@app.get("/url/{slug}")
+async def rediredt_slug(slug:str):
+    try:
+        url = get_url_by_slug(slug)
+        return RedirectResponse(url = url,slug = slug)
+    except Exception as e:
+        raise HTTPException(status_code = 400,detail = f"Error : {e}")    
+    
 
 
 
